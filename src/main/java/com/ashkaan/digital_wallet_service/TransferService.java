@@ -3,6 +3,10 @@ package com.ashkaan.digital_wallet_service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ashkaan.digital_wallet_service.repositories.LedgerEntryRepository;
+import com.ashkaan.digital_wallet_service.repositories.TransactionRepository;
+import com.ashkaan.digital_wallet_service.repositories.WalletRepository;
+
 import java.math.BigDecimal;
 
 @Service

@@ -1,9 +1,12 @@
-package com.ashkaan.digital_wallet_service;
+package com.ashkaan.digital_wallet_service.controllers;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.ashkaan.digital_wallet_service.TransactionHistoryResponse;
+import com.ashkaan.digital_wallet_service.TransactionsHistoryService;
 
 import java.util.List;
 

@@ -8,7 +8,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class DigitalWalletServiceApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(DigitalWalletServiceApplication.class, args);
+		SpringApplication. run(DigitalWalletServiceApplication.class, args);
 	}
 
 }

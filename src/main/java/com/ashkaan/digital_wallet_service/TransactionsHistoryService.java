@@ -2,6 +2,8 @@ package com.ashkaan.digital_wallet_service;
 
 import org.springframework.stereotype.Service;
 
+import com.ashkaan.digital_wallet_service.repositories.LedgerEntryRepository;
+
 import java.util.List;
 
 @Service 
