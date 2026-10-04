@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ashkaan.digital_wallet_service.AuthService;
+import com.ashkaan.digital_wallet_service.JWTService;
 import com.ashkaan.digital_wallet_service.RegisterRequest;
 import com.ashkaan.digital_wallet_service.RegisterResponse;
 import com.ashkaan.digital_wallet_service.LoginRequest;
@@ -16,9 +17,11 @@ import com.ashkaan.digital_wallet_service.User;
 @RequestMapping("/auth")
 public class AuthController {
     private final AuthService authService;
+    private final JWTService jwtService;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, JWTService jwtService) {
         this.authService = authService;
+        this.jwtService = jwtService;
     }
 
     @PostMapping("/register")
@@ -38,7 +41,8 @@ public LoginResponse login(@RequestBody LoginRequest request) {
 
     User user = authService.login(request);
 
-    // JWT abhi nahi — temporarily user login verify kar rahe hain
-    return new LoginResponse("LOGIN_SUCCESS");
+    String token = jwtService.generateToken(user.getEmail());
+
+    return new LoginResponse(token);
 }
 }

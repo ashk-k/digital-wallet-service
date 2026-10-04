@@ -6,9 +6,16 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration 
 public class SecurityConfig {
+
+    private final JWTFilter jwtFilter;
+
+    public SecurityConfig(JWTFilter jwtFilter){
+        this.jwtFilter = jwtFilter;
+    }
     
     @Bean 
     public PasswordEncoder passwordEncoder() { //Spring ko bolre h ki jb bhi pswrd encrypt/hash krna ho, toh tb PasswordEncoder use krna hoga
@@ -20,8 +27,12 @@ public class SecurityConfig {
         http
           .csrf(csrf -> csrf.disable())
           .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/auth/register").permitAll()
-            .anyRequest().authenticated()
+               .requestMatchers("/auth/register", "/auth/login").permitAll()
+               .anyRequest().authenticated()
+          )
+          .addFilterBefore(
+            jwtFilter, 
+            UsernamePasswordAuthenticationFilter.class
           );
           return http.build();
     }
