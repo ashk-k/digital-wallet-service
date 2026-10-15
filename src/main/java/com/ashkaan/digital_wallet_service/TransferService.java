@@ -2,6 +2,8 @@ package com.ashkaan.digital_wallet_service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.ashkaan.digital_wallet_service.repositories.LedgerEntryRepository;
 import com.ashkaan.digital_wallet_service.repositories.TransactionRepository;
@@ -27,7 +29,7 @@ public class TransferService {
     }
 
     @Transactional
-    public void transfer(Long senderWalletId, Long receiverWalletId, BigDecimal amount) {
+    public void transfer(Long senderWalletId, Long receiverWalletId, BigDecimal amount, String email) {
 
         if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Transfer amount must be greater than zero");
@@ -42,7 +44,10 @@ public class TransferService {
 
         Wallet receiverWallet = walletRepository.findById(receiverWalletId)
                 .orElseThrow(() -> new IllegalArgumentException("Receiver wallet not found"));
-
+        
+        if (!senderWallet.getUser().getEmail().equals(email)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not your wallet");
+        }
         if (senderWallet.getBalance().compareTo(amount) < 0) {
             throw new IllegalArgumentException("Insufficient balance");
         }

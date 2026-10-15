@@ -1,7 +1,9 @@
 package com.ashkaan.digital_wallet_service;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.ashkaan.digital_wallet_service.repositories.LedgerEntryRepository;
 import com.ashkaan.digital_wallet_service.repositories.TransactionRepository;
@@ -27,8 +29,8 @@ public class DepositService {
     }
 
     @Transactional
-    public void deposit(Long walletId, BigDecimal amount){
-        
+    public void deposit(Long walletId, BigDecimal amount, String email) {
+
         
         if(amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
           throw new IllegalArgumentException("Deposit should be more than 0");
@@ -36,6 +38,9 @@ public class DepositService {
 
         Wallet wallet = walletRepository.findById(walletId)
               .orElseThrow( () -> new IllegalArgumentException("No Wallet Found"));
+                      if (!wallet.getUser().getEmail().equals(email)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not your wallet");
+        }
         Transaction transaction = new Transaction();
         transaction.setType(TransactionType.DEPOSIT);
         transaction.setAmount(amount);

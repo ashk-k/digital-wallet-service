@@ -4,6 +4,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
 
 import com.ashkaan.digital_wallet_service.DepositRequest;
 import com.ashkaan.digital_wallet_service.DepositService;
@@ -18,8 +19,10 @@ public class DepositController {
     }
 
     @PostMapping("/wallets/deposit")
-    public ResponseEntity<String> deposit(@RequestBody DepositRequest request) {
-        depositService.deposit(request.getWalletId(), request.getAmount());
-        return ResponseEntity.ok("Deposit successful");
+    public ResponseEntity<String> deposit(@RequestBody DepositRequest request,
+                                      Authentication authentication) {
+        depositService.deposit(request.getWalletId(), request.getAmount(),
+                               authentication.getName());
+    return ResponseEntity.ok("Deposit successful");
     }
 }
