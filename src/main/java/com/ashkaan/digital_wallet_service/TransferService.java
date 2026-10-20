@@ -29,7 +29,10 @@ public class TransferService {
     }
 
     @Transactional
-    public void transfer(Long senderWalletId, Long receiverWalletId, BigDecimal amount, String email) {
+    public void transfer(Long senderWalletId, Long receiverWalletId, BigDecimal amount, String email, String idempotencyKey) {
+        if (transactionRepository.findByIdempotencyKey(idempotencyKey).isPresent()){
+            return;
+        }
 
         if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Transfer amount must be greater than zero");
@@ -48,6 +51,9 @@ public class TransferService {
         if (!senderWallet.getUser().getEmail().equals(email)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not your wallet");
         }
+        if (transactionRepository.findByIdempotencyKey(idempotencyKey).isPresent()){
+            return ;
+        }
         if (senderWallet.getBalance().compareTo(amount) < 0) {
             throw new IllegalArgumentException("Insufficient balance");
         }
@@ -56,6 +62,7 @@ public class TransferService {
         transaction.setType(TransactionType.TRANSFER);
         transaction.setAmount(amount);
 
+        transaction.setIdempotencyKey(idempotencyKey);
         transactionRepository.save(transaction);
 
         LedgerEntry debitEntry = new LedgerEntry();
