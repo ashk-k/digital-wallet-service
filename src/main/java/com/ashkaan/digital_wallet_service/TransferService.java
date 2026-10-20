@@ -1,8 +1,8 @@
 package com.ashkaan.digital_wallet_service;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.ashkaan.digital_wallet_service.repositories.LedgerEntryRepository;
@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 
 @Service
 public class TransferService {
-    
+
     private final WalletRepository walletRepository;
     private final TransactionRepository transactionRepository;
     private final LedgerEntryRepository ledgerEntryRepository;
@@ -29,10 +29,8 @@ public class TransferService {
     }
 
     @Transactional
-    public void transfer(Long senderWalletId, Long receiverWalletId, BigDecimal amount, String email, String idempotencyKey) {
-        if (transactionRepository.findByIdempotencyKey(idempotencyKey).isPresent()){
-            return;
-        }
+    public void transfer(Long senderWalletId, Long receiverWalletId, BigDecimal amount,
+                         String email, String idempotencyKey) {
 
         if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Transfer amount must be greater than zero");
@@ -42,12 +40,17 @@ public class TransferService {
             throw new IllegalArgumentException("Sender and receiver wallets must be different");
         }
 
-        Wallet senderWallet = walletRepository.findById(senderWalletId)
-                .orElseThrow(() -> new IllegalArgumentException("Sender wallet not found"));
+        Long firstId = Math.min(senderWalletId, receiverWalletId);
+        Long secondId = Math.max(senderWalletId, receiverWalletId);
 
-        Wallet receiverWallet = walletRepository.findById(receiverWalletId)
-                .orElseThrow(() -> new IllegalArgumentException("Receiver wallet not found"));
-        
+        Wallet first = walletRepository.findByIdForUpdate(firstId)
+                .orElseThrow(() -> new IllegalArgumentException("Wallet not found"));
+        Wallet second = walletRepository.findByIdForUpdate(secondId)
+                .orElseThrow(() -> new IllegalArgumentException("Wallet not found"));
+
+        Wallet senderWallet = senderWalletId.equals(firstId) ? first : second;
+        Wallet receiverWallet = senderWalletId.equals(firstId) ? second : first;
+
         if (!senderWallet.getUser().getEmail().equals(email)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not your wallet");
         }
